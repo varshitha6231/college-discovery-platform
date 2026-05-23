@@ -1,0 +1,69 @@
+"use client";
+import { useState } from "react";
+import Link from "next/link";
+
+export default function RegisterPage() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleRegister() {
+    setLoading(true);
+    setError("");
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
+    });
+    const data = await res.json();
+    setLoading(false);
+    if (!res.ok) return setError(data.error ?? "Registration failed");
+    window.location.href = "/auth/login";
+  }
+
+  return (
+    <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="bg-white rounded-2xl shadow p-8 w-full max-w-md border">
+        <h1 className="text-3xl font-bold mb-2 text-center">Create Account</h1>
+        <p className="text-gray-500 text-center mb-6 text-sm">Join thousands of students</p>
+        {error && <p className="text-red-500 text-sm mb-4 bg-red-50 p-3 rounded-lg text-center">{error}</p>}
+        <div className="space-y-4">
+          <input
+            type="text"
+            placeholder="Full Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+          />
+          <input
+            type="email"
+            placeholder="Email address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+          />
+          <input
+            type="password"
+            placeholder="Password (min 6 characters)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+          />
+          <button
+            onClick={handleRegister}
+            disabled={loading}
+            className="w-full bg-teal-700 text-white py-3 rounded-lg font-medium hover:bg-teal-800 transition disabled:opacity-50"
+          >
+            {loading ? "Creating account..." : "Sign Up"}
+          </button>
+        </div>
+        <p className="text-center text-sm text-black-500 mt-6">
+          Already have an account?{" "}
+          <Link href="/auth/login" className="text-teal-700 font-medium hover:underline">Login</Link>
+        </p>
+      </div>
+    </main>
+  );
+}
