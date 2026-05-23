@@ -3,17 +3,40 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  name           String?
+  password       String?
+  role           String          @default("USER")
+  createdAt      DateTime        @default(now())
+
+  savedColleges  SavedCollege[]
 }
 
 model College {
+  id          String          @id @default(cuid())
+  name        String
+  location    String?
+  description String?
+  ranking     Int?
+  createdAt   DateTime        @default(now())
+
+  savedBy     SavedCollege[]
+}
+
+model SavedCollege {
   id        String   @id @default(cuid())
-  name      String
-  location  String
-  state     String
-  type      String
-  ranking   Int?
-  fees      Int?
+  userId    String
+  collegeId String
   createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  college   College  @relation(fields: [collegeId], references: [id])
+
+  @@unique([userId, collegeId])
 }
